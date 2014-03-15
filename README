@@ -1,0 +1,27 @@
+Grammar for byHand
+
+<re> -----> <union>
+<union> --> <union> '|' <concat>
+	 | <concat>
+<concat> -> <concat> <char>
+   	 | <char>
+<char> ---> <c> * 
+	 | <c>
+<c> ------> '(' <union> ')' 
+	 | a|b|....z|A|B|....Z
+
+Grammar for byGen
+
+<S>            -> <union_list>
+<union_list>   -> <union_list> UNION <concat_list>
+	       | <concat_list>
+<concat_list>  -> <concat_list> <char_closure>
+	       | <char_closure>
+<char_closure> -> <char> CLOSURE
+	       | <char>
+<char>         -> LPAREN <union_list> RPAREN
+	       | CHAR
+UNION -> '|'
+CLOSURE -> '*'
+CHAR -> a|b|....d
+  

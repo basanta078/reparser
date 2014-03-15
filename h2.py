@@ -129,36 +129,52 @@ class fsm:
 		#combine self.finalstate and fsm1.startingstate
 		anode = self.returnNode(final)
 		bnode = fsm1.returnNode(0)
+		#count branches of nodes from bnode
+		count = 0
+		for c in bnode.tlist.keys():
+			for i in bnode.tlist[c]:
+				count += 1
+		start = 1
+		newtotal = self.totalstates + fsm1.totalstates -1
+		newfinal = newtotal-1
+		#if count is 1 it is safe to remove this node and the next one
+		if count == 1 :
+			bnode = fsm1.returnNode(1)
+			start = 2
+			newtotal = newtotal - 1
+			newfinal = newtotal - 1
+		
+		index = start - 1	
 		for c in bnode.tlist.keys():
 			if c not in self.symbols:
-				self.symbols.append(symbol)
+				self.symbols.append(c)
 			for i in bnode.tlist[c]:
-				anode.tlist[c].append(final+i)
+				anode.tlist[c].append(final+i-index)
 		#now copies the the rest of nodes from fsm1 to self
-		self.copyNodes(fsm1)
+		self.copyNodes(fsm1, start)
 		#change finalstate and totalstates
-		self.totalstates = self.totalstates + fsm1.totalstates - 1
-		self.finalstate = self.totalstates - 1
+		self.totalstates = newtotal
+		self.finalstate = newfinal
 		
-	def copyNodes(self, fsm1) :
+	def copyNodes(self, fsm1, start) :
 		#start copying from state 1 
 		final = self.finalstate
+		index = start - 1
 		#add the nodes to self
-		for i in range(1, fsm1.totalstates):
-			self.addNode(node(final+i))
+		for i in range(start, fsm1.totalstates):
+			self.addNode(node(final+i-index))
 			
-		for i in range(1, fsm1.totalstates) :
+		for i in range(start, fsm1.totalstates) :
 			anode = fsm1.returnNode(i)
-			bnode = self.returnNode(final+i)
+			bnode = self.returnNode(final+i-index)
 			for c in anode.tlist.keys() :
 				if c not in self.symbols:
 					self.symbols.append(c)
 				for j in anode.tlist[c]:
-					bnode.tlist[c].append(final+j)
+					bnode.tlist[c].append(final+j-index)
 		
 					
 			
-
 	def unionFsm(self, fsm1) :
 		#add fsm2 to a new branch to state 0 of self
 		anode = self.returnNode(0)
@@ -169,7 +185,7 @@ class fsm:
                         for i in bnode.tlist[c]:
                                 anode.tlist[c].append(final+i)
 		#now copies the rest of nodes from fsm1 to self
-		self.copyNodes(fsm1)
+		self.copyNodes(fsm1,1)
 		#now add a final state to join these two fsms
 		newfinal = self.totalstates + fsm1.totalstates - 1
 		self.addNode(node(newfinal))
